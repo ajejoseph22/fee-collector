@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 
-import type { User } from "@/api/user/userModel";
-import { UserRepository } from "@/api/user/userRepository";
-import { ServiceResponse } from "@/common/models/serviceResponse";
+import type { User } from "@/api/user/user.model";
+import { UserRepository } from "@/api/user/user.repository";
+import { ServiceResponse } from "@/common/models/service.response";
 import { logger } from "@/server";
 
 export class UserService {

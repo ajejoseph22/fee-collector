@@ -1,11 +1,11 @@
 import { StatusCodes } from "http-status-codes";
 import type { Mock } from "vitest";
 
-import type { User } from "@/api/user/userModel";
-import { UserRepository } from "@/api/user/userRepository";
-import { UserService } from "@/api/user/userService";
+import type { User } from "@/api/user/user.model";
+import { UserRepository } from "@/api/user/user.repository";
+import { UserService } from "@/api/user/user.service";
 
-vi.mock("@/api/user/userRepository");
+vi.mock("@/api/user/user.repository");
 
 describe("userService", () => {
 	let userServiceInstance: UserService;
