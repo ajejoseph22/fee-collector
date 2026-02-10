@@ -257,7 +257,7 @@ async function persistEvents(
 		log,
 	);
 	log.info(
-		{ upserted: result.upsertedCount, matched: result.matchedCount },
+		{ added: result.upsertedCount, skipped: result.matchedCount },
 		"persisted events",
 	);
 }
