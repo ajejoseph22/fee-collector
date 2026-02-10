@@ -11,6 +11,7 @@ export interface ChainDefinition {
 	rpcUrl: string;
 	contractAddress: string;
 	startBlock: number;
+	reorgBacktrack: number;
 }
 
 /**
@@ -33,6 +34,7 @@ export const SUPPORTED_CHAINS: Record<Chain, ChainDefinition> = {
 		rpcUrl: env.FEE_COLLECTOR_POLYGON_RPC,
 		contractAddress: env.FEE_COLLECTOR_POLYGON_ADDRESS,
 		startBlock: env.FEE_COLLECTOR_POLYGON_START_BLOCK,
+		reorgBacktrack: env.FEE_COLLECTOR_POLYGON_REORG_BACKTRACK,
 	},
 	// Just a proof of concept, not tested
 	[Chain.Ethereum]: {
@@ -41,5 +43,6 @@ export const SUPPORTED_CHAINS: Record<Chain, ChainDefinition> = {
 		rpcUrl: env.FEE_COLLECTOR_ETHEREUM_RPC,
 		contractAddress: env.FEE_COLLECTOR_ETHEREUM_ADDRESS,
 		startBlock: env.FEE_COLLECTOR_ETHEREUM_START_BLOCK,
+		reorgBacktrack: env.FEE_COLLECTOR_ETHEREUM_REORG_BACKTRACK,
 	},
 };
