@@ -42,7 +42,7 @@ export class FeeRepository {
 
 		const docs = await FeeCollectedEventModel.find(filter)
 			.sort({ blockNumber: 1, logIndex: 1, _id: 1 })
-			.limit(options.limit + 1)
+			.limit(options.limit + 1) // Fetch one extra to determine if there's a next page
 			.lean()
 			.exec();
 
