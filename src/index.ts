@@ -3,7 +3,7 @@ import { connectMongo, disconnectMongo } from "@/common/db/mongo";
 import { app, logger } from "@/server";
 
 async function main() {
-	await connectMongo();
+	await connectMongo(env.MONGO_URI, env.MONGO_DB);
 
 	const server = app.listen(env.PORT, () => {
 		const { NODE_ENV, HOST, PORT } = env;

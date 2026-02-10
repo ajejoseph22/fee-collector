@@ -9,13 +9,13 @@ import { getModelForClass, index, modelOptions, prop } from "@typegoose/typegoos
 	},
 })
 export class ChainSyncState {
-	@prop({ required: true })
+	@prop({ required: true, type: Number })
 	public chainId!: number;
 
-	@prop({ required: true })
+	@prop({ required: true, type: Number })
 	public lastProcessedBlock!: number;
 
-	@prop({ required: true })
+	@prop({ required: true, type: String })
 	public lastProcessedBlockHash!: string;
 
 	public updatedAt!: Date;

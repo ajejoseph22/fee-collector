@@ -1,13 +1,9 @@
 import mongoose from "mongoose";
 import { pino } from "pino";
-import { env } from "@/common/utils/env.config";
 
 const logger = pino({ name: "mongo" });
 
-export async function connectMongo(): Promise<typeof mongoose> {
-	const uri = env.MONGO_URI;
-	const dbName = env.MONGO_DB;
-
+export async function connectMongo(uri: string, dbName: string): Promise<typeof mongoose> {
 	logger.info({ uri: uri.replace(/\/\/.*@/, "//<credentials>@"), dbName }, "Connecting to MongoDB");
 
 	try {

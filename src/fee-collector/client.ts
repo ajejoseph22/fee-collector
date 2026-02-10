@@ -14,6 +14,9 @@ export interface FeeCollectorClient {
 /**
  * Creates a typed FeeCollector client bound to a specific RPC and contract address.
  * Uses the TypeChain-generated factory from lifi-contract-types for type-safe event queries.
+ *
+ * @param rpcUrl - JSON-RPC endpoint for the target chain (e.g. `https://polygon-rpc.com`).
+ * @param contractAddress - Deployed address of the LI.FI FeeCollector contract on that chain.
  */
 export function createFeeCollectorClient(rpcUrl: string, contractAddress: string): FeeCollectorClient {
 	const provider = new ethers.providers.JsonRpcProvider(rpcUrl);

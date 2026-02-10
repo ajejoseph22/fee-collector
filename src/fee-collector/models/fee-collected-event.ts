@@ -12,39 +12,39 @@ import { getModelForClass, index, modelOptions, prop } from "@typegoose/typegoos
 	},
 })
 export class FeeCollectedEvent {
-	@prop({ required: true })
+	@prop({ required: true, type: Number })
 	public chainId!: number;
 
-	@prop({ required: true })
+	@prop({ required: true, type: Number })
 	public blockNumber!: number;
 
-	@prop({ required: true })
+	@prop({ required: true, type: String })
 	public blockHash!: string;
 
-	@prop({ required: true })
+	@prop({ required: true, type: String })
 	public txHash!: string;
 
-	@prop({ required: true })
+	@prop({ required: true, type: Number })
 	public logIndex!: number;
 
 	/** EVM address of the collected token (lowercase). */
-	@prop({ required: true })
+	@prop({ required: true, type: String })
 	public token!: string;
 
 	/** EVM address of the integrator (lowercase). */
-	@prop({ required: true })
+	@prop({ required: true, type: String })
 	public integrator!: string;
 
 	/** Integrator fee share — stored as a string for BigNumber precision safety. */
-	@prop({ required: true })
+	@prop({ required: true, type: String })
 	public integratorFee!: string;
 
 	/** LI.FI fee share — stored as a string for BigNumber precision safety. */
-	@prop({ required: true })
+	@prop({ required: true, type: String })
 	public lifiFee!: string;
 
 	/** Block timestamp as a unix epoch (seconds). */
-	@prop({ required: true })
+	@prop({ required: true, type: Number })
 	public blockTimestamp!: number;
 
 	public createdAt!: Date;
