@@ -18,7 +18,7 @@ export interface SyncConfig {
 // Public API
 // ------------------
 
-export async function sync(client: FeeCollectorClient, config: SyncConfig, logger?: Logger): Promise<void> {
+export async function sync(client: FeeCollectorClient, config: SyncConfig, logger?: Logger, signal?: AbortSignal): Promise<void> {
 	const log = (logger ?? pino({ name: "fee-collector-sync" })).child({ chainId: config.chainId });
 
 	// 1. Compute the safe block once for the entire cycle
@@ -36,6 +36,11 @@ export async function sync(client: FeeCollectorClient, config: SyncConfig, logge
 	// 4. Batch loop
 	let range = computeBatchRange(state.lastProcessedBlock, safeBlock, config.batchSize);
 	while (range) {
+		if (signal?.aborted) {
+			log.info({ lastProcessedBlock: state.lastProcessedBlock }, "shutdown requested, stopping sync");
+			return;
+		}
+
 		log.info({ from: range.from, to: range.to }, "processing batch");
 
 		// a. Query events

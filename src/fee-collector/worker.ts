@@ -20,6 +20,64 @@ interface WorkerConfig {
 	syncConfig: SyncConfig;
 }
 
+const abortController = new AbortController();
+
+async function run(): Promise<void> {
+	const chainNames = parseChainFlag();
+	const chainDefinitions = chainNames.map((name) => SUPPORTED_CHAINS[name]);
+	const workerConfigs = createWorkerConfigs(chainDefinitions);
+	const shouldSyncOnce = process.argv.includes("--once");
+
+	await connectMongo(env.MONGO_URI, env.MONGO_DB);
+	logger.info(
+		{ chains: workerConfigs.map((workerConfig) => workerConfig.chain.name), pollIntervalMs: env.FEE_COLLECTOR_POLL_INTERVAL_MS },
+		"worker started",
+	);
+
+	while (!abortController.signal.aborted) {
+		const results = await Promise.allSettled(
+			workerConfigs.map((workerConfig) =>
+				sync(workerConfig.client, workerConfig.syncConfig, logger, abortController.signal),
+			),
+		);
+
+		for (const [i, result] of results.entries()) {
+			if (result.status === "rejected") {
+				logger.error(
+					{ chain: workerConfigs[i].chain.name, err: result.reason },
+					`sync failed${shouldSyncOnce? '' : ', will retry after poll interval'}`,
+				);
+			}
+		}
+
+		if (shouldSyncOnce) {
+			logger.info("--once flag set, exiting after single cycle");
+			break;
+		}
+
+		await sleep(env.FEE_COLLECTOR_POLL_INTERVAL_MS);
+	}
+
+	await disconnectMongo();
+	logger.info("worker stopped");
+}
+
+function onShutdown(): void {
+	logger.info("shutdown signal received");
+	abortController.abort();
+}
+
+process.on("SIGINT", onShutdown);
+process.on("SIGTERM", onShutdown);
+
+run().catch((err) => {
+	logger.error({ err }, "worker crashed");
+	process.exit(1);
+});
+
+// -------------------
+// HELPER FUNCTIONS
+// -------------------
 function parseChainFlag(): Chain[] {
 	const idx = process.argv.indexOf("--chain");
 	const chainFlagNotSetOrEmpty = idx === -1 || idx + 1 >= process.argv.length
@@ -53,61 +111,6 @@ function createWorkerConfigs(chainDefinitions: ChainDefinition[]): WorkerConfig[
 	}));
 }
 
-let shutdownRequested = false;
-
 function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-async function run(): Promise<void> {
-	const chainNames = parseChainFlag();
-	const chainDefinitions = chainNames.map((name) => SUPPORTED_CHAINS[name]);
-	const workerConfigs = createWorkerConfigs(chainDefinitions);
-	const shouldSyncOnce = process.argv.includes("--once");
-
-	await connectMongo(env.MONGO_URI, env.MONGO_DB);
-	logger.info(
-		{ chains: workerConfigs.map((workerConfig) => workerConfig.chain.name), pollIntervalMs: env.FEE_COLLECTOR_POLL_INTERVAL_MS },
-		"worker started",
-	);
-
-	while (!shutdownRequested) {
-		const results = await Promise.allSettled(
-			workerConfigs.map((workerConfig) =>
-				sync(workerConfig.client, workerConfig.syncConfig, logger),
-			),
-		);
-
-		for (const [i, result] of results.entries()) {
-			if (result.status === "rejected") {
-				logger.error(
-					{ chain: workerConfigs[i].chain.name, err: result.reason },
-					`sync failed${shouldSyncOnce? '' : ', will retry after poll interval'}`,
-				);
-			}
-		}
-
-		if (shouldSyncOnce) {
-			logger.info("--once flag set, exiting after single cycle");
-			break;
-		}
-
-		await sleep(env.FEE_COLLECTOR_POLL_INTERVAL_MS);
-	}
-
-	await disconnectMongo();
-	logger.info("worker stopped");
-}
-
-async function onShutdown(): Promise<void> {
-	logger.info("shutdown signal received");
-	shutdownRequested = true;
-}
-
-process.on("SIGINT", onShutdown);
-process.on("SIGTERM", onShutdown);
-
-run().catch((err) => {
-	logger.error({ err }, "worker crashed");
-	process.exit(1);
-});
