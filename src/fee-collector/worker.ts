@@ -4,7 +4,7 @@ import { env } from "@/fee-collector/env.config";
 import { connectMongo, disconnectMongo } from "@/common/db/mongo";
 import { createFeeCollectorClient } from "@/fee-collector/client";
 import { Chain, SUPPORTED_CHAINS, type ChainDefinition } from "@/fee-collector/chains.config";
-import { syncOnce, type SyncConfig } from "@/fee-collector/sync.service";
+import { sync, type SyncConfig } from "@/fee-collector/sync.service";
 import type { FeeCollectorClient } from "@/fee-collector/client";
 
 const isProduction = env.NODE_ENV === "production";
@@ -47,7 +47,8 @@ function createWorkerConfigs(chainDefinitions: ChainDefinition[]): WorkerConfig[
 			startBlock: definition.startBlock,
 			confirmations: env.FEE_COLLECTOR_CONFIRMATIONS,
 			batchSize: env.FEE_COLLECTOR_BATCH_SIZE,
-			reorgBacktrack: env.FEE_COLLECTOR_REORG_BACKTRACK,
+			reorgBacktrack: definition.reorgBacktrack,
+			batchDelayMs: env.FEE_COLLECTOR_BATCH_DELAY_MS,
 		},
 	}));
 }
@@ -73,7 +74,7 @@ async function run(): Promise<void> {
 	while (!shutdownRequested) {
 		const results = await Promise.allSettled(
 			workerConfigs.map((workerConfig) =>
-				syncOnce(workerConfig.client, workerConfig.syncConfig, logger),
+				sync(workerConfig.client, workerConfig.syncConfig, logger),
 			),
 		);
 
@@ -81,7 +82,7 @@ async function run(): Promise<void> {
 			if (result.status === "rejected") {
 				logger.error(
 					{ chain: workerConfigs[i].chain.name, err: result.reason },
-					"syncOnce failed, will retry after poll interval",
+					`sync failed${shouldSyncOnce? '' : ', will retry after poll interval'}`,
 				);
 			}
 		}

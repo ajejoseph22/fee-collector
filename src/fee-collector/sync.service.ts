@@ -11,13 +11,14 @@ export interface SyncConfig {
 	confirmations: number;
 	batchSize: number;
 	reorgBacktrack: number;
+	batchDelayMs: number;
 }
 
 // ------------------
 // Public API
 // ------------------
 
-export async function syncOnce(client: FeeCollectorClient, config: SyncConfig, logger?: Logger): Promise<void> {
+export async function sync(client: FeeCollectorClient, config: SyncConfig, logger?: Logger): Promise<void> {
 	const log = (logger ?? pino({ name: "fee-collector-sync" })).child({ chainId: config.chainId });
 
 	// 1. Compute the safe block once for the entire cycle
@@ -63,6 +64,9 @@ export async function syncOnce(client: FeeCollectorClient, config: SyncConfig, l
 		// d. Advance
 		state.lastProcessedBlock = range.to;
 		range = computeBatchRange(state.lastProcessedBlock, safeBlock, config.batchSize);
+
+		// e. Throttle before next batch to avoid rate limits
+		if (range) await sleep(config.batchDelayMs);
 	}
 
 	log.info({ lastProcessedBlock: state.lastProcessedBlock, safeBlock }, "fully caught up");
@@ -81,7 +85,7 @@ async function withRetry<T>(
 	label: string,
 	log: Logger,
 	maxAttempts = 3,
-	initialDelayMs = 1000,
+	initialDelayMs = 5000,
 ): Promise<T> {
 	let lastError: unknown;
 
