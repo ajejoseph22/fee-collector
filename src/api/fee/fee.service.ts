@@ -57,9 +57,12 @@ export class FeeService {
 			});
 
 			const hasNextPage = rows.length > safeLimit;
+			// Only take rows up to safeLimit for the current page
 			const pageRows = hasNextPage ? rows.slice(0, safeLimit) : rows;
 			const data = mapRowsToEvents(pageRows);
 
+			// Generate cursor for the next page if there is one.
+			// We use the last item of the current page as the cursor reference point.
 			const lastRow = pageRows[pageRows.length - 1];
 			const nextCursor =
 				hasNextPage && lastRow
