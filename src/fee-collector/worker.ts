@@ -34,15 +34,20 @@ async function run(): Promise<void> {
 		"worker started",
 	);
 
-	while (!abortController.signal.aborted) {
+	const processIsAborted = () => abortController.signal.aborted;
+
+	while (!processIsAborted()) {
 		const results = await Promise.allSettled(
 			workerConfigs.map((workerConfig) =>
 				sync(workerConfig.client, workerConfig.syncConfig, logger, abortController.signal),
 			),
 		);
 
+		let anySyncFailed = false;
+
 		for (const [i, result] of results.entries()) {
 			if (result.status === "rejected") {
+				anySyncFailed = true;
 				logger.error(
 					{ chain: workerConfigs[i].chain.name, err: result.reason },
 					`sync failed${shouldSyncOnce? '' : ', will retry after poll interval'}`,
@@ -52,10 +57,17 @@ async function run(): Promise<void> {
 
 		if (shouldSyncOnce) {
 			logger.info("--once flag set, exiting after single cycle");
+
+			if (anySyncFailed) {
+				process.exitCode = 1
+			}
+
 			break;
 		}
 
-		await sleep(env.FEE_COLLECTOR_POLL_INTERVAL_MS);
+		if (!processIsAborted()) {
+			await sleep(env.FEE_COLLECTOR_POLL_INTERVAL_MS, abortController.signal);
+		}
 	}
 
 	await disconnectMongo();
@@ -111,6 +123,20 @@ function createWorkerConfigs(chainDefinitions: ChainDefinition[]): WorkerConfig[
 	}));
 }
 
-function sleep(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+function sleep(ms: number, signal: AbortSignal): Promise<void> {
+	if (signal.aborted) return Promise.resolve();
+
+	return new Promise((resolve) => {
+		const timer = setTimeout(done, ms);
+
+		const onAbort = () => done();
+
+		function done() {
+			clearTimeout(timer);
+			signal.removeEventListener("abort", onAbort);
+			resolve();
+		}
+
+		signal.addEventListener("abort", onAbort, { once: true });
+	});
 }

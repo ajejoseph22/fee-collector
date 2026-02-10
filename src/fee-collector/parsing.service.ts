@@ -34,7 +34,7 @@ export function parseFeeCollectedEvents(
 		const parsed = feeCollectorInterface.parseLog(event);
 
 		const timestamp = blockTimestamps.get(event.blockNumber);
-		if (!timestamp) {
+		if (timestamp === undefined) {
 			throw new Error(`Missing block timestamp for block ${event.blockNumber}`);
 		}
 
