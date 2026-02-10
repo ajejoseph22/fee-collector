@@ -19,7 +19,7 @@ export interface FeeCollectorClient {
  * @param contractAddress - Deployed address of the LI.FI FeeCollector contract on that chain.
  */
 export function createFeeCollectorClient(rpcUrl: string, contractAddress: string): FeeCollectorClient {
-	const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+	const provider = new ethers.providers.StaticJsonRpcProvider(rpcUrl);
 	const contract: FeeCollector = FeeCollector__factory.connect(contractAddress, provider);
 
 	return {
