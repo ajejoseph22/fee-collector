@@ -1,21 +1,18 @@
 {
-	"name": "express-typescript-boilerplate",
+	"name": "fee-collector",
 	"version": "1.0.14",
-	"description": "An Express boilerplate backend",
-	"author": "Edwin Hernandez",
-	"repository": "edwinhern/express-typescript-2024",
 	"license": "MIT",
 	"main": "index.ts",
 	"private": true,
 	"type": "module",
 	"scripts": {
 		"build": "tsc && tsc-alias -f",
-		"start:dev": "node --import=tsx --watch src/index.ts",
+		"start:dev": "node --import=tsx --watch src/api/index.ts",
 		"start:prod": "node dist/index.js",
 		"check": "biome check --write",
 		"test": "vitest run",
 		"test:cov": "vitest run --coverage",
-		"sync:fees": "node --import=tsx src/fee-collector/worker.ts"
+		"sync:fees": "node --import=tsx src/fee-collector/worker.entry.ts"
 	},
 	"dependencies": {
 		"@asteasolutions/zod-to-openapi": "7.3.4",

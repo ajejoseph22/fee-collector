@@ -5,10 +5,10 @@ import { pino } from "pino";
 import { feeRouter } from "@/api/fee/fee.router";
 import { healthCheckRouter } from "@/api/health-check/health-check.router";
 import { openAPIRouter } from "@/api/api-docs/open-api.router";
-import errorHandler from "@/common/middleware/error.handler";
-import rateLimiter from "@/common/middleware/rate.limiter";
-import requestLogger from "@/common/middleware/request.logger";
-import { env } from "@/common/utils/env.config";
+import errorHandler from "@/api/middleware/error.handler";
+import rateLimiter from "@/api/middleware/rate.limiter";
+import requestLogger from "@/api/middleware/request.logger";
+import { env } from "@/api/env.config";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();

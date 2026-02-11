@@ -1,6 +1,6 @@
 import { connectMongo, disconnectMongo } from "@/common/db/mongo";
-import { env } from "@/common/utils/env.config";
-import { app, logger } from "@/server";
+import { env } from "@/api/env.config";
+import { app, logger } from "@/api/server";
 
 async function main() {
 	await connectMongo(env.MONGO_URI, env.MONGO_DB);
@@ -11,7 +11,7 @@ async function main() {
 	});
 
 	const onCloseSignal = async () => {
-		logger.info("Shutdown signal received, shutting down");
+		logger.info("Shutdown signal received, gracefully shutting down...");
 		server.close(async () => {
 			await disconnectMongo();
 			logger.info("Server closed");

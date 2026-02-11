@@ -1,4 +1,4 @@
-import { env } from "@/fee-collector/env.config";
+import { env } from "@/fee-collector/config/env.config";
 
 export enum Chain {
 	Polygon = "polygon",

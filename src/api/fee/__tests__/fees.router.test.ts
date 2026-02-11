@@ -3,7 +3,7 @@ import request from "supertest";
 
 import type { FeeEventList } from "@/api/fee/fee.model";
 import { feeService } from "@/api/fee/fee.router";
-import { app } from "@/server";
+import { app } from "@/api/server";
 
 describe("Fees API Endpoints", () => {
 	const integrator = "0x1111111111111111111111111111111111111111";

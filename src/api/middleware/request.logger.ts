@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import pino from "pino";
 import pinoHttp from "pino-http";
 
-import { env } from "@/common/utils/env.config";
+import { env } from "@/api/env.config";
 import { prettyTransport } from "@/common/utils/logger";
 
 const logger = pino({
