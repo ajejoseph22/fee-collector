@@ -74,10 +74,12 @@ That's it!
 
 The worker will start syncing fees from Polygon by default, and there will be an endpoint available at `http://localhost:8080/fees` to query the indexed fees.
 
-You can customize worker chains by editing the `.env` file. **Only Polygon is supported for now:**
+You can customize worker chains by editing the `.env` file. Chains must be comma-separated **without spaces**:
 ```dotenv
 WORKER_CHAINS="polygon,ethereum"
 ```
+
+> **Note:** Only Polygon is actively supported. Ethereum is recognized as an extensibility POC but will be skipped with a warning. Unknown chains will cause the worker to exit with an error.
 
 ## Running the app
 ### Docker Compose (recommended)
@@ -122,8 +124,9 @@ docker run --env-file .env -e MONGO_URI=mongodb://host.docker.internal:27017 fee
 ### Notes
 > **Scaling per chain (optional):** Instead of syncing all chains in one container, you can run a dedicated worker per chain for independent resource allocation, fault isolation, and independent restarts:
 >  ```bash
->  docker run fee-consolidation-service-worker --chain polygon
->  docker run fee-consolidation-service-worker --chain ethereum # POC, currently not supported
+>  docker run --env-file .env -e MONGO_URI=<some-mongo-url> fee-consolidation-service-worker --chain polygon
+>  docker run --env-file .env -e MONGO_URI=<some-mongo-url> fee-consolidation-service-worker --chain ethereum # POC, currently not supported
+> ...
 >  ```
 
 

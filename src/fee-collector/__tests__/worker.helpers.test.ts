@@ -19,7 +19,7 @@ describe("parseChainFlag", () => {
 	});
 
 	it("should parse a single chain", () => {
-		expect(parseChainFlag(["node", "worker.js", "--chain", "ethereum"])).toEqual([Chain.Ethereum]);
+		expect(parseChainFlag(["node", "worker.js", "--chain", "polygon"])).toEqual([Chain.Polygon]);
 	});
 
 	it("should parse comma-separated chains", () => {
@@ -29,9 +29,19 @@ describe("parseChainFlag", () => {
 		]);
 	});
 
+	it("should deduplicate repeated chains", () => {
+		expect(parseChainFlag(["node", "worker.js", "--chain", "polygon,polygon"])).toEqual([Chain.Polygon]);
+	});
+
 	it("should throw on unknown chain", () => {
 		expect(() => parseChainFlag(["node", "worker.js", "--chain", "solana"])).toThrow(
 			'Unknown chain "solana". Valid chains: polygon, ethereum',
+		);
+	});
+
+	it("should throw when chains are space-separated", () => {
+		expect(() => parseChainFlag(["node", "worker.js", "--chain", "polygon,", "solana"])).toThrow(
+			"Chains must be comma-separated without spaces",
 		);
 	});
 });

@@ -27,7 +27,7 @@ export interface ChainDefinition {
  * causing redundant block re-scanning and wasted RPC calls. Upserts prevent
  * duplicate events, but the overhead is significant.
  */
-export const SUPPORTED_CHAINS: Record<Chain, ChainDefinition> = {
+export const SUPPORTED_CHAINS: Partial<Record<Chain, ChainDefinition>> = {
 	[Chain.Polygon]: {
 		chainId: 137,
 		name: Chain.Polygon,
@@ -36,13 +36,13 @@ export const SUPPORTED_CHAINS: Record<Chain, ChainDefinition> = {
 		startBlock: env.FEE_COLLECTOR_POLYGON_START_BLOCK,
 		reorgBacktrack: env.FEE_COLLECTOR_POLYGON_REORG_BACKTRACK,
 	},
-	// Just a proof of concept, not tested
-	[Chain.Ethereum]: {
-		chainId: 1,
-		name: Chain.Ethereum,
-		rpcUrl: env.FEE_COLLECTOR_ETHEREUM_RPC,
-		contractAddress: env.FEE_COLLECTOR_ETHEREUM_ADDRESS,
-		startBlock: env.FEE_COLLECTOR_ETHEREUM_START_BLOCK,
-		reorgBacktrack: env.FEE_COLLECTOR_ETHEREUM_REORG_BACKTRACK,
-	},
+	// Extensibility POC only:
+	// [Chain.Ethereum]: {
+	// 	chainId: 1,
+	// 	name: Chain.Ethereum,
+	// 	rpcUrl: env.FEE_COLLECTOR_ETHEREUM_RPC,
+	// 	contractAddress: env.FEE_COLLECTOR_ETHEREUM_ADDRESS,
+	// 	startBlock: env.FEE_COLLECTOR_ETHEREUM_START_BLOCK,
+	// 	reorgBacktrack: env.FEE_COLLECTOR_ETHEREUM_REORG_BACKTRACK,
+	// },
 };
