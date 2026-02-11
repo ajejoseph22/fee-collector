@@ -33,6 +33,7 @@ const envSchema = z.object({
 	FEE_COLLECTOR_BATCH_SIZE: z.coerce.number().int().positive().default(10),
 	FEE_COLLECTOR_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(15000),
 	FEE_COLLECTOR_BATCH_DELAY_MS: z.coerce.number().int().nonnegative().default(200),
+	FEE_COLLECTOR_LOCK_TTL_MS: z.coerce.number().int().positive().default(1800000),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
