@@ -1,8 +1,8 @@
 import { type Logger, pino } from "pino";
 
-import type { FeeCollectorClient } from "./client";
-import { ChainSyncStateModel } from "./models/chain-sync-state";
-import { FeeCollectedEventModel } from "./models/fee-collected-event";
+import type { FeeCollectorClient } from "../client";
+import { ChainSyncStateModel } from "../models/chain-sync-state";
+import { FeeCollectedEventModel } from "../models/fee-collected-event";
 import { parseFeeCollectedEvents } from "./parsing.service";
 
 export interface SyncConfig {

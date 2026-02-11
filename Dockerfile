@@ -29,7 +29,7 @@ USER node
 
 # Worker target — ENTRYPOINT/CMD split so args are overridable
 FROM runner AS worker
-ENTRYPOINT ["node", "dist/fee-collector/worker.js"]
+ENTRYPOINT ["node", "dist/fee-collector/worker.entry.js"]
 CMD ["--chain", "polygon"]
 
 # API target (default when no --target is specified)

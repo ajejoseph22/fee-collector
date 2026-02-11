@@ -11,7 +11,7 @@ async function main() {
 	});
 
 	const onCloseSignal = async () => {
-		logger.info("Shutdown signal received, shutting down");
+		logger.info("Shutdown signal received, gracefully shutting down...");
 		server.close(async () => {
 			await disconnectMongo();
 			logger.info("Server closed");
