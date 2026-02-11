@@ -3,8 +3,7 @@ import type { Logger } from "pino";
 import { z } from "zod";
 
 import type { FeeEventList } from "@/api/fee/fee.model";
-import type { FeeEventRow, FeesCursor } from "./fee.repository";
-import { FeeRepository } from "./fee.repository";
+import type { FeeEventRow, FeeRepository, FeesCursor } from "./fee.repository";
 
 const MAX_LIMIT = 200;
 const DEFAULT_LIMIT = 50;

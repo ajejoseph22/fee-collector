@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import { BigNumber, type ethers } from "ethers";
 import { FeeCollector__factory } from "lifi-contract-types";
 
 /** Shape that matches the FeeCollectedEvent Typegoose model (excluding createdAt). */

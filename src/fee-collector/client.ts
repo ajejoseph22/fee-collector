@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
-import { FeeCollector__factory } from "lifi-contract-types";
 import type { FeeCollector } from "lifi-contract-types";
+import { FeeCollector__factory } from "lifi-contract-types";
 
 export interface FeeCollectorClient {
 	/** Query all FeesCollected events in the given block range (inclusive). */

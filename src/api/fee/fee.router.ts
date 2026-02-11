@@ -46,7 +46,6 @@ feeRegistry.registerPath({
 	},
 });
 
-
 export const feeRepository = new FeeRepository();
 export const feeService = new FeeService(feeRepository, pino({ name: "fees-service" }));
 export const feeController = new FeeController(feeService);

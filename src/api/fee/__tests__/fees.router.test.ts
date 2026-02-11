@@ -26,9 +26,7 @@ describe("Fees API Endpoints", () => {
 			],
 			cursor: "cursor-1",
 		};
-		const findByIntegratorSpy = vi
-			.spyOn(feeService, "findByIntegrator")
-			.mockResolvedValue(responseObject);
+		const findByIntegratorSpy = vi.spyOn(feeService, "findByIntegrator").mockResolvedValue(responseObject);
 
 		const response = await request(app).get("/fees").query({ integrator, chainId: "137", limit: "1" });
 
@@ -38,15 +36,18 @@ describe("Fees API Endpoints", () => {
 	});
 
 	it("GET /fees uses default limit and forwards cursor", async () => {
-		const findByIntegratorSpy = vi
-			.spyOn(feeService, "findByIntegrator")
-			.mockResolvedValue({ data: [], cursor: null });
-		const defaultLimit = 50
+		const findByIntegratorSpy = vi.spyOn(feeService, "findByIntegrator").mockResolvedValue({ data: [], cursor: null });
+		const defaultLimit = 50;
 
 		const response = await request(app).get("/fees").query({ integrator, cursor: "opaque-cursor" });
 
 		expect(response.statusCode).toEqual(StatusCodes.OK);
-		expect(findByIntegratorSpy).toHaveBeenCalledWith(integrator.toLowerCase(), undefined, "opaque-cursor", defaultLimit);
+		expect(findByIntegratorSpy).toHaveBeenCalledWith(
+			integrator.toLowerCase(),
+			undefined,
+			"opaque-cursor",
+			defaultLimit,
+		);
 	});
 
 	it("GET /fees returns bad request for an invalid integrator", async () => {
