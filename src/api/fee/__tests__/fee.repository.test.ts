@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import {describe, Mock} from "vitest";
+import { describe, type Mock } from "vitest";
 
 import { FeeRepository } from "@/api/fee/fee.repository";
 import { FeeCollectedEventModel } from "@/fee-collector/models/fee-collected-event";

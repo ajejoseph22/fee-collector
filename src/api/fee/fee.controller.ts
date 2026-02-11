@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import type { ZodError } from "zod";
 
 import { GetFeesQuerySchema } from "@/api/fee/fee.model";
-import { FeeServiceError, type FeeService } from "@/api/fee/fee.service";
+import { type FeeService, FeeServiceError } from "@/api/fee/fee.service";
 
 function formatZodError(error: ZodError): string {
 	return error.errors

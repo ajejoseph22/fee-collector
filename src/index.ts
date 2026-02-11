@@ -1,5 +1,5 @@
-import { env } from "@/common/utils/env.config";
 import { connectMongo, disconnectMongo } from "@/common/db/mongo";
+import { env } from "@/common/utils/env.config";
 import { app, logger } from "@/server";
 
 async function main() {

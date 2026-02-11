@@ -1,9 +1,9 @@
-import { pino, type Logger } from "pino";
+import { type Logger, pino } from "pino";
 
 import type { FeeCollectorClient } from "./client";
-import { parseFeeCollectedEvents } from "./parsing.service";
-import { FeeCollectedEventModel } from "./models/fee-collected-event";
 import { ChainSyncStateModel } from "./models/chain-sync-state";
+import { FeeCollectedEventModel } from "./models/fee-collected-event";
+import { parseFeeCollectedEvents } from "./parsing.service";
 
 export interface SyncConfig {
 	chainId: number;
@@ -18,7 +18,12 @@ export interface SyncConfig {
 // Public API
 // ------------------
 
-export async function sync(client: FeeCollectorClient, config: SyncConfig, logger?: Logger, signal?: AbortSignal): Promise<void> {
+export async function sync(
+	client: FeeCollectorClient,
+	config: SyncConfig,
+	logger?: Logger,
+	signal?: AbortSignal,
+): Promise<void> {
 	const log = (logger ?? pino({ name: "fee-collector-sync" })).child({ chainId: config.chainId });
 
 	// 1. Compute the safe block once for the entire cycle
@@ -36,19 +41,17 @@ export async function sync(client: FeeCollectorClient, config: SyncConfig, logge
 	// 4. Batch loop
 	let range = computeBatchRange(state.lastProcessedBlock, safeBlock, config.batchSize);
 	while (range) {
+		const batch = range;
+
 		if (signal?.aborted) {
 			log.info({ lastProcessedBlock: state.lastProcessedBlock }, "shutdown requested, stopping sync");
 			return;
 		}
 
-		log.info({ from: range.from, to: range.to }, "processing batch");
+		log.info({ from: batch.from, to: batch.to }, "processing batch");
 
 		// a. Query events
-		const rawEvents = await withRetry(
-			() => client.queryFeesCollected(range!.from, range!.to),
-			"queryFeesCollected",
-			log,
-		);
+		const rawEvents = await withRetry(() => client.queryFeesCollected(batch.from, batch.to), "queryFeesCollected", log);
 
 		// b. Parse and persist events if any
 		if (rawEvents.length > 0) {
@@ -59,15 +62,11 @@ export async function sync(client: FeeCollectorClient, config: SyncConfig, logge
 		}
 
 		// c. Update sync state with the end block of this batch
-		const endBlock = await withRetry(
-			() => client.getBlock(range!.to),
-			"getBlock(endBlock)",
-			log,
-		);
-		await updateSyncState(config.chainId, range!.to, endBlock.hash, log);
+		const endBlock = await withRetry(() => client.getBlock(batch.to), "getBlock(endBlock)", log);
+		await updateSyncState(config.chainId, batch.to, endBlock.hash, log);
 
 		// d. Advance
-		state.lastProcessedBlock = range.to;
+		state.lastProcessedBlock = batch.to;
 		range = computeBatchRange(state.lastProcessedBlock, safeBlock, config.batchSize);
 
 		// e. Throttle before next batch to avoid rate limits
@@ -76,7 +75,6 @@ export async function sync(client: FeeCollectorClient, config: SyncConfig, logge
 
 	log.info({ lastProcessedBlock: state.lastProcessedBlock, safeBlock }, "fully caught up");
 }
-
 
 // -------------------
 // Internal helpers
@@ -111,11 +109,7 @@ async function withRetry<T>(
 	throw lastError;
 }
 
-async function getLatestSafeBlock(
-	client: FeeCollectorClient,
-	config: SyncConfig,
-	log: Logger,
-): Promise<number> {
+async function getLatestSafeBlock(client: FeeCollectorClient, config: SyncConfig, log: Logger): Promise<number> {
 	const latest = await withRetry(() => client.getBlockNumber(), "getBlockNumber", log);
 	const safeBlock = latest - config.confirmations;
 	log.info({ latest, confirmations: config.confirmations, safeBlock }, "computed safe block");
@@ -127,17 +121,10 @@ async function loadSyncState(
 	startBlock: number,
 	log: Logger,
 ): Promise<{ lastProcessedBlock: number; lastProcessedBlockHash: string | null }> {
-	const state = await withRetry(
-		() => ChainSyncStateModel.findOne({ chainId }).lean().exec(),
-		"loadSyncState",
-		log,
-	);
+	const state = await withRetry(() => ChainSyncStateModel.findOne({ chainId }).lean().exec(), "loadSyncState", log);
 
 	if (state) {
-		log.info(
-			{ lastProcessedBlock: state.lastProcessedBlock },
-			"loaded existing sync state",
-		);
+		log.info({ lastProcessedBlock: state.lastProcessedBlock }, "loaded existing sync state");
 
 		return {
 			lastProcessedBlock: state.lastProcessedBlock,
@@ -157,11 +144,7 @@ async function detectReorg(
 ): Promise<boolean> {
 	if (!state.lastProcessedBlockHash) return false;
 
-	const block = await withRetry(
-		() => client.getBlock(state.lastProcessedBlock),
-		"detectReorg.getBlock",
-		log,
-	);
+	const block = await withRetry(() => client.getBlock(state.lastProcessedBlock), "detectReorg.getBlock", log);
 	if (block.hash !== state.lastProcessedBlockHash) {
 		log.warn(
 			{
@@ -197,11 +180,7 @@ async function handleReorg(
 
 	if (rollbackTo < config.startBlock) {
 		// Nothing to reference — remove sync state entirely
-		await withRetry(
-			() => ChainSyncStateModel.deleteOne({ chainId }).exec(),
-			"handleReorg.deleteSyncState",
-			log,
-		);
+		await withRetry(() => ChainSyncStateModel.deleteOne({ chainId }).exec(), "handleReorg.deleteSyncState", log);
 	} else {
 		await withRetry(
 			() =>
@@ -226,9 +205,7 @@ async function fetchBlockTimestamps(
 	const unique = [...new Set(blockNumbers)];
 	log.debug({ count: unique.length }, "fetching block timestamps");
 
-	const blocks = await Promise.all(
-		unique.map((bn) => withRetry(() => client.getBlock(bn), `getBlock(${bn})`, log)),
-	);
+	const blocks = await Promise.all(unique.map((bn) => withRetry(() => client.getBlock(bn), `getBlock(${bn})`, log)));
 
 	const map = new Map<number, number>();
 	for (const block of blocks) {
@@ -237,10 +214,7 @@ async function fetchBlockTimestamps(
 	return map;
 }
 
-async function persistEvents(
-	events: ReturnType<typeof parseFeeCollectedEvents>,
-	log: Logger,
-): Promise<void> {
+async function persistEvents(events: ReturnType<typeof parseFeeCollectedEvents>, log: Logger): Promise<void> {
 	if (events.length === 0) return;
 
 	const bulkOps = events.map((e) => ({
@@ -256,18 +230,10 @@ async function persistEvents(
 		"persistEvents",
 		log,
 	);
-	log.info(
-		{ added: result.upsertedCount, skipped: result.matchedCount },
-		"persisted events",
-	);
+	log.info({ added: result.upsertedCount, skipped: result.matchedCount }, "persisted events");
 }
 
-async function updateSyncState(
-	chainId: number,
-	blockNumber: number,
-	blockHash: string,
-	log: Logger,
-): Promise<void> {
+async function updateSyncState(chainId: number, blockNumber: number, blockHash: string, log: Logger): Promise<void> {
 	await withRetry(
 		() =>
 			ChainSyncStateModel.updateOne(

@@ -1,17 +1,16 @@
 import { pino } from "pino";
-
-import { env } from "@/fee-collector/env.config";
 import { connectMongo, disconnectMongo } from "@/common/db/mongo";
-import { createFeeCollectorClient } from "@/fee-collector/client";
-import { Chain, SUPPORTED_CHAINS, type ChainDefinition } from "@/fee-collector/chains.config";
-import { sync, type SyncConfig } from "@/fee-collector/sync.service";
+import { Chain, type ChainDefinition, SUPPORTED_CHAINS } from "@/fee-collector/chains.config";
 import type { FeeCollectorClient } from "@/fee-collector/client";
+import { createFeeCollectorClient } from "@/fee-collector/client";
+import { env } from "@/fee-collector/env.config";
+import { type SyncConfig, sync } from "@/fee-collector/sync.service";
 
 const isProduction = env.NODE_ENV === "production";
 
 const logger = pino({
 	name: "fee-collector-worker",
-	...(!isProduction && {transport: { target: "pino-pretty" }}),
+	...(!isProduction && { transport: { target: "pino-pretty" } }),
 });
 
 interface WorkerConfig {
@@ -30,7 +29,10 @@ async function run(): Promise<void> {
 
 	await connectMongo(env.MONGO_URI, env.MONGO_DB);
 	logger.info(
-		{ chains: workerConfigs.map((workerConfig) => workerConfig.chain.name), pollIntervalMs: env.FEE_COLLECTOR_POLL_INTERVAL_MS },
+		{
+			chains: workerConfigs.map((workerConfig) => workerConfig.chain.name),
+			pollIntervalMs: env.FEE_COLLECTOR_POLL_INTERVAL_MS,
+		},
 		"worker started",
 	);
 
@@ -50,7 +52,7 @@ async function run(): Promise<void> {
 				anySyncFailed = true;
 				logger.error(
 					{ chain: workerConfigs[i].chain.name, err: result.reason },
-					`sync failed${shouldSyncOnce? '' : ', will retry after poll interval'}`,
+					`sync failed${shouldSyncOnce ? "" : ", will retry after poll interval"}`,
 				);
 			}
 		}
@@ -59,7 +61,7 @@ async function run(): Promise<void> {
 			logger.info("--once flag set, exiting after single cycle");
 
 			if (anySyncFailed) {
-				process.exitCode = 1
+				process.exitCode = 1;
 			}
 
 			break;
@@ -92,11 +94,14 @@ run().catch((err) => {
 // -------------------
 function parseChainFlag(): Chain[] {
 	const idx = process.argv.indexOf("--chain");
-	const chainFlagNotSetOrEmpty = idx === -1 || idx + 1 >= process.argv.length
+	const chainFlagNotSetOrEmpty = idx === -1 || idx + 1 >= process.argv.length;
 
 	if (chainFlagNotSetOrEmpty) return [Chain.Polygon];
 
-	const rawChains = process.argv[idx + 1].split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+	const rawChains = process.argv[idx + 1]
+		.split(",")
+		.map((s) => s.trim().toLowerCase())
+		.filter(Boolean);
 	const validChains = Object.values(Chain);
 
 	for (const chainName of rawChains) {

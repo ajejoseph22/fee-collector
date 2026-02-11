@@ -12,19 +12,13 @@ const envSchema = z.object({
 
 	// Polygon
 	FEE_COLLECTOR_POLYGON_RPC: z.string().url().default("https://polygon-rpc.com"),
-	FEE_COLLECTOR_POLYGON_ADDRESS: z
-		.string()
-		.min(1)
-		.default("0xbD6C7B0d2f68c2b7805d88388319cfB6EcB50eA9"),
+	FEE_COLLECTOR_POLYGON_ADDRESS: z.string().min(1).default("0xbD6C7B0d2f68c2b7805d88388319cfB6EcB50eA9"),
 	FEE_COLLECTOR_POLYGON_START_BLOCK: z.coerce.number().int().nonnegative().default(78600000),
 	FEE_COLLECTOR_POLYGON_REORG_BACKTRACK: z.coerce.number().int().positive().default(200),
 
 	// Ethereum (POC, not tested)
 	FEE_COLLECTOR_ETHEREUM_RPC: z.string().url().default("https://ethereum-rpc.publicnode.com"),
-	FEE_COLLECTOR_ETHEREUM_ADDRESS: z
-		.string()
-		.min(1)
-		.default("0xbD6C7B0d2f68c2b7805d88388319cfB6EcB50eA9"),
+	FEE_COLLECTOR_ETHEREUM_ADDRESS: z.string().min(1).default("0xbD6C7B0d2f68c2b7805d88388319cfB6EcB50eA9"),
 	FEE_COLLECTOR_ETHEREUM_START_BLOCK: z.coerce.number().int().nonnegative().default(18500000),
 	FEE_COLLECTOR_ETHEREUM_REORG_BACKTRACK: z.coerce.number().int().positive().default(64),
 

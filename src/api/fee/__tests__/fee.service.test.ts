@@ -1,9 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import type { Logger } from "pino";
 import type { Mock } from "vitest";
-
-import { FeeService, FeeServiceError } from "@/api/fee/fee.service";
 import type { FeeEventRow, FeeRepository } from "@/api/fee/fee.repository";
+import { FeeService, FeeServiceError } from "@/api/fee/fee.service";
 
 interface LoggerWithErrorOnly extends Pick<Logger, "error"> {}
 
