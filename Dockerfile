@@ -1,5 +1,5 @@
 # Base stage with pnpm setup
-FROM node:23.11.1-slim AS base
+FROM node:22.22.0-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -19,17 +19,20 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
 
-# Final stage - combine production dependencies and build output
-FROM node:23.11.1-alpine AS runner
+# Shared runner base
+FROM node:22.22.0-alpine AS runner
 WORKDIR /app
+COPY --from=build --chown=node:node /app/package.json ./package.json
 COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
-
-# Use the node user from the image
 USER node
 
-# Expose port 8080
-EXPOSE 8080
+# Worker target — ENTRYPOINT/CMD split so args are overridable
+FROM runner AS worker
+ENTRYPOINT ["node", "dist/fee-collector/worker.js"]
+CMD ["--chain", "polygon"]
 
-# Start the server
+# API target (default when no --target is specified)
+FROM runner AS api
+EXPOSE 8080
 CMD ["node", "dist/index.js"]
