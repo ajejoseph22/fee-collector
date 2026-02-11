@@ -1,13 +1,27 @@
 import type { Logger } from "pino";
 import { connectMongo, disconnectMongo } from "@/common/db/mongo";
-import { SUPPORTED_CHAINS } from "@/fee-collector/config/chains.config";
+import { type ChainDefinition, SUPPORTED_CHAINS } from "@/fee-collector/config/chains.config";
 import { env } from "@/fee-collector/config/env.config";
 import { sync } from "@/fee-collector/services/sync.service";
 import { createWorkerConfigs, parseChainFlag, sleep } from "@/fee-collector/worker.helpers";
 
 export async function run(argv: string[], signal: AbortSignal, logger: Logger): Promise<void> {
 	const chainNames = parseChainFlag(argv);
-	const chainDefinitions = chainNames.map((name) => SUPPORTED_CHAINS[name]);
+	const chainDefinitions = chainNames
+		.filter((name) => {
+			if (!SUPPORTED_CHAINS[name]) {
+				logger.warn({ chain: name }, "chain recognized (extensibility POC only) but not yet supported, skipping...");
+				return false;
+			}
+			return true;
+		})
+		.map((name) => SUPPORTED_CHAINS[name] as ChainDefinition);
+
+	if (!chainDefinitions.length) {
+		logger.warn("no supported chains to sync");
+		return;
+	}
+
 	const workerConfigs = createWorkerConfigs(chainDefinitions);
 	const shouldSyncOnce = argv.includes("--once");
 

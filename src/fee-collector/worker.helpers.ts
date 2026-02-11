@@ -16,6 +16,12 @@ export function parseChainFlag(argv: string[]): Chain[] {
 
 	if (chainFlagNotSetOrEmpty) return [Chain.Polygon];
 
+	// Detect space-separated chains like "--chain polygon, solana" where "solana" becomes a separate arg
+	const nextArg = argv[flagIndex + 2];
+	if (nextArg && !nextArg.startsWith("--")) {
+		throw new Error("Chains must be comma-separated without spaces (e.g. --chain polygon,ethereum)");
+	}
+
 	const rawChains = argv[flagIndex + 1]
 		.split(",")
 		.map((s) => s.trim().toLowerCase())
@@ -28,7 +34,7 @@ export function parseChainFlag(argv: string[]): Chain[] {
 		}
 	}
 
-	return rawChains as Chain[];
+	return [...new Set(rawChains)] as Chain[];
 }
 
 export function createWorkerConfigs(chainDefinitions: ChainDefinition[]): WorkerConfig[] {

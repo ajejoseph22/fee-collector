@@ -25,7 +25,6 @@ vi.mock("@/fee-collector/worker.helpers", () => ({
 vi.mock("@/fee-collector/config/chains.config", () => ({
 	SUPPORTED_CHAINS: {
 		polygon: { chainId: 137, name: "polygon" },
-		ethereum: { chainId: 1, name: "ethereum" },
 	},
 }));
 
@@ -40,7 +39,7 @@ vi.mock("@/fee-collector/config/env.config", () => ({
 import type { Logger } from "pino";
 import { run } from "@/fee-collector/worker";
 
-const logger = { info: vi.fn(), error: vi.fn() } as unknown as Logger;
+const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() } as unknown as Logger;
 
 function createWorkerConfig(chainName: string) {
 	return {
@@ -191,6 +190,34 @@ describe("Worker run()", () => {
 			await run(["node", "worker.ts", "--once"], new AbortController().signal, logger);
 
 			expect(mocks.disconnectMongo).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe("Unsupported chains", () => {
+		it("should warn and skip chains not in SUPPORTED_CHAINS config", async () => {
+			mocks.parseChainFlag.mockReturnValue(["ethereum"]);
+
+			await run(["node", "worker.ts", "--once"], new AbortController().signal, logger);
+
+			expect(logger.warn).toHaveBeenCalledWith(
+				{ chain: "ethereum" },
+				"chain recognized (extensibility POC only) but not yet supported, skipping...",
+			);
+			expect(logger.warn).toHaveBeenCalledWith("no supported chains to sync");
+			expect(mocks.connectMongo).not.toHaveBeenCalled();
+			expect(mocks.sync).not.toHaveBeenCalled();
+		});
+
+		it("should sync supported chains and skip unsupported ones", async () => {
+			mocks.parseChainFlag.mockReturnValue(["polygon", "ethereum"]);
+
+			await run(["node", "worker.ts", "--once"], new AbortController().signal, logger);
+
+			expect(logger.warn).toHaveBeenCalledWith(
+				{ chain: "ethereum" },
+				"chain recognized (extensibility POC only) but not yet supported, skipping...",
+			);
+			expect(mocks.sync).toHaveBeenCalledTimes(1);
 		});
 	});
 });
