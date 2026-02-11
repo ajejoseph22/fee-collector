@@ -141,6 +141,8 @@ docker run --env-file .env -e MONGO_URI=mongodb://host.docker.internal:27017 fee
 
 
 ## API Docs
+Interactive Swagger documentation is available at [http://localhost:8080/](http://localhost:8080/) when the API is running.
+
 ### `GET /fees`
 Query params:
 - `integrator` (required): EVM address.
