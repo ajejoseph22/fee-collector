@@ -5,10 +5,11 @@ import pino from "pino";
 import pinoHttp from "pino-http";
 
 import { env } from "@/common/utils/env.config";
+import { prettyTransport } from "@/common/utils/logger";
 
 const logger = pino({
 	level: env.isProduction ? "info" : "debug",
-	transport: env.isProduction ? undefined : { target: "pino-pretty" },
+	transport: env.isProduction ? undefined : prettyTransport(),
 });
 
 const getLogLevel = (status: number) => {

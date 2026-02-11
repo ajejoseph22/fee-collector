@@ -53,7 +53,7 @@ The **worker** polls EVM chains via RPC for `FeesCollected` contract events, nor
 
 ## Prerequisites
 - Docker + Docker Compose
-- Node.js v18+ (optional, via Docker)
+- Node.js v22+ (optional, via Docker)
 - MongoDB (optional, via Docker)
 
 ## Quick Setup
@@ -110,13 +110,13 @@ docker run -d --name mongo -p 27017:27017 mongo:8
 API:
 ```
 docker build -t fee-consolidation-service-api --target api .               
-docker run -p 8080:8080 --env-file .env fee-consolidation-service-api 
+docker run -p 8080:8080 --env-file .env -e MONGO_URI=mongodb://host.docker.internal:27017 fee-consolidation-service-api
 ```
 
 Worker:
 ```
 docker build -t fee-consolidation-service-worker --target worker .
-docker run --env-file .env fee-consolidation-service-worker
+docker run --env-file .env -e MONGO_URI=mongodb://host.docker.internal:27017 fee-consolidation-service-worker
 ```
 
 ### Notes
