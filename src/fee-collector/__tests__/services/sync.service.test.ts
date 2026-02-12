@@ -280,6 +280,18 @@ describe("Sync service", () => {
 		vi.useRealTimers();
 	});
 
+	it("should throw with a clear message when getBlock returns null (e.g. RPC misconfiguration)", async () => {
+		mocks.chainStateFindOne.mockReturnValue(queryResult({ lastProcessedBlock: 150, lastProcessedBlockHash: "0xold" }));
+
+		const client = {
+			getBlockNumber: vi.fn().mockResolvedValue(200),
+			queryFeesCollected: vi.fn(),
+			getBlock: vi.fn().mockResolvedValue(null), // block doesn't exist on this chain
+		};
+
+		await expect(sync(client, config, logger)).rejects.toThrow("not found on chain — possible RPC misconfiguration");
+	});
+
 	it("should stop without querying events when aborted before first batch", async () => {
 		mocks.chainStateFindOne.mockReturnValue(queryResult(null));
 

@@ -43,7 +43,7 @@ export async function run(argv: string[], signal: AbortSignal, logger: Logger): 
 
 		// Check if shutdown was requested during sync. If so, exit immediately
 		if (processIsAborted()) {
-			logger.info("Gracefully shutting down...");
+			logger.info("Gracefully shutting down worker...");
 			break;
 		}
 

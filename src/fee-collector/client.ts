@@ -5,8 +5,8 @@ import { FeeCollector__factory } from "lifi-contract-types";
 export interface FeeCollectorClient {
 	/** Query all FeesCollected events in the given block range (inclusive). */
 	queryFeesCollected(fromBlock: number, toBlock: number): Promise<ethers.Event[]>;
-	/** Get block metadata (number, hash, timestamp). */
-	getBlock(blockNumber: number): Promise<ethers.providers.Block>;
+	/** Get block metadata (number, hash, timestamp). Returns null if block doesn't exist. */
+	getBlock(blockNumber: number): Promise<ethers.providers.Block | null>;
 	/** Get the latest block number from the chain. */
 	getBlockNumber(): Promise<number>;
 }

@@ -63,6 +63,9 @@ export async function sync(
 
 		// c. Update sync state with the end block of this batch
 		const endBlock = await withRetry(() => client.getBlock(batch.to), "getBlock(endBlock)", log);
+		if (!endBlock) {
+			throw new Error(`Block ${batch.to} not found on chain — possible RPC misconfiguration`);
+		}
 		await updateSyncState(config.chainId, batch.to, endBlock.hash, log);
 
 		// d. Advance
@@ -145,6 +148,11 @@ async function detectReorg(
 	if (!state.lastProcessedBlockHash) return false;
 
 	const block = await withRetry(() => client.getBlock(state.lastProcessedBlock), "detectReorg.getBlock", log);
+
+	if (!block) {
+		throw new Error(`Block ${state.lastProcessedBlock} not found on chain — possible RPC misconfiguration`);
+	}
+
 	if (block.hash !== state.lastProcessedBlockHash) {
 		log.warn(
 			{
@@ -202,13 +210,20 @@ async function fetchBlockTimestamps(
 	blockNumbers: number[],
 	log: Logger,
 ): Promise<Map<number, number>> {
-	const unique = [...new Set(blockNumbers)];
-	log.debug({ count: unique.length }, "fetching block timestamps");
+	const uniqueBlockNumbers = [...new Set(blockNumbers)];
+	log.debug({ count: uniqueBlockNumbers.length }, "fetching block timestamps");
 
-	const blocks = await Promise.all(unique.map((bn) => withRetry(() => client.getBlock(bn), `getBlock(${bn})`, log)));
+	const uniqueBlocks = await Promise.all(
+		uniqueBlockNumbers.map((blockNumber) =>
+			withRetry(() => client.getBlock(blockNumber), `getBlock(${blockNumber})`, log),
+		),
+	);
 
 	const map = new Map<number, number>();
-	for (const block of blocks) {
+	for (const block of uniqueBlocks) {
+		if (!block) {
+			throw new Error("Block not found on chain — possible RPC misconfiguration");
+		}
 		map.set(block.number, block.timestamp);
 	}
 	return map;
