@@ -2,6 +2,8 @@
 
 Fee consolidation engine for indexing `FeesCollected` events from LI.FI `FeeCollector` contracts and exposing them via REST.
 
+For architectural decisions, design trade-offs, and internals, see [documentation.md](./documentation.md).
+
 ## Table of Contents
 - [Architecture](#architecture)
 - [Feature Summary](#feature-summary)
@@ -9,6 +11,7 @@ Fee consolidation engine for indexing `FeesCollected` events from LI.FI `FeeColl
 - [Prerequisites](#prerequisites)
 - [Quick Setup](#quick-setup)
 - [Running the App](#running-the-app)
+- [Notes](#notes)
 - [Scripts](#scripts)
 - [API Docs](#api-docs)
 - [Next Steps](#next-steps)
@@ -41,7 +44,7 @@ The **worker** polls EVM chains via RPC for `FeesCollected` contract events, nor
 - Scans supported EVM chains (currently Polygon by default) for `FeesCollected` events.
 - Stores normalized events in MongoDB with idempotent writes.
 - Tracks chain sync state to avoid rescanning finalized blocks.
-- Exposes a `GET /fees` endpoint with cursor pagination (`limit` + `cursor`).
+- Exposes a `GET /fees` endpoint with pagination and filtering (by `integrator` and `chainId`).
 
 ## Tech Stack
 - Node.js + TypeScript
@@ -186,13 +189,13 @@ Error response:
 
 ## Next Steps
 
-- **Fees endpoint auth**: The `/fees` endpoint is currently unauthenticated. Ideally, add authentication (AuthN) and authorization (AuthZ).
-  - Enforce AuthZ so the authenticated integrator can only query events for its own `integrator` address.
-  - If `query.integrator` does not match the caller identity/claims, return `403 Forbidden`.
-  - Support privileged/admin scopes for cross-integrator reads.
-  - Add audit logging for authorization decisions and rejected access attempts.
 - **Distributed worker lock per chain**: Prevent multiple workers from processing the same chain concurrently.
   - Add a per-chain lease lock in MongoDB with `ownerId` and `expiresAt`.
   - Add heartbeat-based lease renewal while sync is running to avoid lock expiry during long cycles.
   - Treat lock loss as a sync failure for that chain and surface non-zero exit in `--once` mode.
   - Add lock-specific tests for acquire/release/renew, stale lock takeover, and multi-worker contention.
+- **Fees endpoint auth**: The `/fees` endpoint is currently unauthenticated. Ideally, add authentication (AuthN) and authorization (AuthZ).
+  - Enforce AuthZ so the authenticated integrator can only query events for its own `integrator` address.
+  - If `query.integrator` does not match the caller identity/claims, return `403 Forbidden`.
+  - Support privileged/admin scopes for cross-integrator reads.
+  - Add audit logging for authorization decisions and rejected access attempts.
