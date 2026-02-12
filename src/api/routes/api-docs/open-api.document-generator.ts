@@ -1,7 +1,7 @@
 import { OpenAPIRegistry, OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
 
-import { feeRegistry } from "@/api/fee/fee.router";
-import { healthCheckRegistry } from "@/api/health-check/health-check.router";
+import { feeRegistry } from "@/api/routes/fee/fee.router";
+import { healthCheckRegistry } from "@/api/routes/health-check/health-check.router";
 
 export type OpenAPIDocument = ReturnType<OpenApiGeneratorV3["generateDocument"]>;
 

@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-import type { FeeEvent } from "@/api/fee/fee.model";
+import type { FeeEvent } from "@/api/routes/fee/fee.model";
 import { FeeCollectedEventModel } from "@/fee-collector/models/fee-collected-event";
 
 export interface FeesCursor {

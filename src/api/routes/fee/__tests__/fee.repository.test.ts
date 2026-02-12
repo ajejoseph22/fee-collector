@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { describe, type Mock } from "vitest";
 
-import { FeeRepository } from "@/api/fee/fee.repository";
+import { FeeRepository } from "@/api/routes/fee/fee.repository";
 import { FeeCollectedEventModel } from "@/fee-collector/models/fee-collected-event";
 
 vi.mock("@/fee-collector/models/fee-collected-event", () => ({

@@ -31,31 +31,31 @@ This separation exists because the two components have fundamentally different s
 
 ```
 src/
-├── index.ts                              # Express app bootstrap
-├── server.ts                             # HTTP server entry
-│
 ├── api/                                  # ── REST API  ──
-│   ├── fee/
-│   │   ├── fee.controller.ts             # request validation, response shaping
-│   │   ├── fee.service.ts                # business logic, cursor encoding/decoding
-│   │   ├── fee.repository.ts             # MongoDB queries 
-│   │   ├── fee.model.ts                  # Zod schemas + OpenAPI type generation
-│   │   └── fee.router.ts                 # GET /fees route definition
-│   ├── health-check/
-│   │   └── health-check.router.ts        # GET /health-check route definition
-│   └── api-docs/
-│       ├── open-api.document-generator.ts # OpenAPI spec builder
-│       └── open-api.router.ts            # Swagger UI route definition
+│   ├── index.ts                          # Express app bootstrap
+│   ├── server.ts                         # HTTP server entry
+│   ├── env.config.ts                     # API env vars
+│   ├── middleware/                        # Error handler, rate limiter, request logger
+│   └── routes/
+│       ├── fee/
+│       │   ├── fee.controller.ts             # request validation, response shaping
+│       │   ├── fee.service.ts                # business logic, cursor encoding/decoding
+│       │   ├── fee.repository.ts             # MongoDB queries
+│       │   ├── fee.model.ts                  # Zod schemas + OpenAPI type generation
+│       │   └── fee.router.ts                 # GET /fees route definition
+│       ├── health-check/
+│       │   └── health-check.router.ts        # GET /health-check route definition
+│       └── api-docs/
+│           ├── open-api.document-generator.ts # OpenAPI spec builder
+│           └── open-api.router.ts            # Swagger UI route definition
 │
 ├── common/                               # ── Shared infrastructure ──
 │   ├── db/mongo.ts                       # Mongo connection helpers
-│   ├── middleware/                       # Error handler, rate limiter, request logger
 │   └── utils/
-│       ├── env.config.ts                 # Shared env vars 
 │       └── logger.ts                     # logging utils
 │
 └── fee-collector/                        # ── Fee collection worker/engine ──
-    ├── worker.entry.ts                   # worker entry point 
+    ├── worker.entry.ts                   # worker entry point
     ├── worker.ts                         # worker orchestration
     ├── worker.helpers.ts                 # helper functions (CLI parsing, sleep with AbortSignal, etc.)
     ├── client.ts                         # FeeCollectorClient interface + factory
@@ -112,7 +112,7 @@ Events are persisted using MongoDB `bulkWrite` with `updateOne` + `$setOnInsert`
 
 ### Crash recovery
 
-The sync state checkpoint (`lastProcessedBlock`, `lastProcessedBlockHash`) is updated after each batch is persisted. On crash, the next run resumes from the last checkpoint. The worst case is re-scanning one batchSize worth of blocks — events are deduplicated by the upsert logic, so this is safe.
+The sync state checkpoint (`lastProcessedBlock`, `lastProcessedBlockHash`) is updated after each batch is persisted. On crash, the next run resumes from the last checkpoint. The worst case is re-scanning one `batchSize` worth of blocks — events are deduplicated by the upsert logic, so this is safe.
 
 ### Event uniqueness
 
@@ -194,7 +194,7 @@ Offset pagination (`skip` + `limit`) works fine for small datasets, but MongoDB'
 
 
 ## Testing
-The entire codebase has ~85% test coverage across unit and integration tests. The sync engine has dedicated tests for services, helpers, the client and the worker while the API has tests for controllers, services, and repositories
+The entire codebase has ~85% test coverage across unit and integration tests. The sync engine has dedicated tests for services, helpers, the client and the worker while the API has tests for controllers, services, and repositories.
 Verifiable by running `pnpm run test:cov`:
 
 

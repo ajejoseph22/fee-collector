@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
-import type { FeeEventList } from "@/api/fee/fee.model";
-import { feeService } from "@/api/fee/fee.router";
+import type { FeeEventList } from "@/api/routes/fee/fee.model";
+import { feeService } from "@/api/routes/fee/fee.router";
 import { app } from "@/api/server";
 
 describe("Fees API Endpoints", () => {

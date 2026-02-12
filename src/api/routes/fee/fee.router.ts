@@ -3,10 +3,10 @@ import express, { type Router } from "express";
 import { StatusCodes } from "http-status-codes";
 import { pino } from "pino";
 
-import { FeeController } from "@/api/fee/fee.controller";
-import { FeeErrorSchema, FeeEventListSchema, FeeEventSchema, GetFeesSchema } from "@/api/fee/fee.model";
-import { FeeRepository } from "@/api/fee/fee.repository";
-import { FeeService } from "@/api/fee/fee.service";
+import { FeeController } from "@/api/routes/fee/fee.controller";
+import { FeeErrorSchema, FeeEventListSchema, FeeEventSchema, GetFeesSchema } from "@/api/routes/fee/fee.model";
+import { FeeRepository } from "@/api/routes/fee/fee.repository";
+import { FeeService } from "@/api/routes/fee/fee.service";
 
 export const feeRegistry = new OpenAPIRegistry();
 

@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import type { Logger } from "pino";
 import { z } from "zod";
 
-import type { FeeEventList } from "@/api/fee/fee.model";
+import type { FeeEventList } from "@/api/routes/fee/fee.model";
 import type { FeeEventRow, FeeRepository, FeesCursor } from "./fee.repository";
 
 const MAX_LIMIT = 200;

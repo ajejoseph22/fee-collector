@@ -2,8 +2,8 @@ import type { Request, RequestHandler, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import type { ZodError } from "zod";
 
-import { GetFeesQuerySchema } from "@/api/fee/fee.model";
-import { type FeeService, FeeServiceError } from "@/api/fee/fee.service";
+import { GetFeesQuerySchema } from "@/api/routes/fee/fee.model";
+import { type FeeService, FeeServiceError } from "@/api/routes/fee/fee.service";
 
 function formatZodError(error: ZodError): string {
 	return error.errors
