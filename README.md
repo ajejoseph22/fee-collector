@@ -125,7 +125,7 @@ docker run --env-file .env -e MONGO_URI=mongodb://host.docker.internal:27017 fee
 ```
 
 ### Notes
-> **Scaling per chain (optional):** Instead of syncing all chains in one container, you can run a dedicated worker per chain for independent resource allocation, fault isolation, and independent restarts:
+> **Scaling per chain (optional):** Instead of syncing all chains in one container, you can run a dedicated worker per chain for independent resource allocation, fault isolation, and restarts:
 >  ```bash
 >  docker run --env-file .env -e MONGO_URI=<some-mongo-url> fee-consolidation-service-worker --chain polygon
 >  docker run --env-file .env -e MONGO_URI=<some-mongo-url> fee-consolidation-service-worker --chain ethereum # POC, currently not supported

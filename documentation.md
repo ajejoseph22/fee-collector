@@ -112,7 +112,7 @@ Events are persisted using MongoDB `bulkWrite` with `updateOne` + `$setOnInsert`
 
 ### Crash recovery
 
-The sync state checkpoint (`lastProcessedBlock`, `lastProcessedBlockHash`) is updated after each batch is persisted. On crash, the next run resumes from the last checkpoint. The worst case is re-scanning one batchSize worth of blocks — events are deduplicated by the upsert logic, so this is safe.
+The sync state checkpoint (`lastProcessedBlock`, `lastProcessedBlockHash`) is updated after each batch is persisted. On crash, the next run resumes from the last checkpoint. The worst case is re-scanning one `batchSize` worth of blocks — events are deduplicated by the upsert logic, so this is safe.
 
 ### Event uniqueness
 
@@ -194,7 +194,7 @@ Offset pagination (`skip` + `limit`) works fine for small datasets, but MongoDB'
 
 
 ## Testing
-The entire codebase has ~85% test coverage across unit and integration tests. The sync engine has dedicated tests for services, helpers, the client and the worker while the API has tests for controllers, services, and repositories
+The entire codebase has ~85% test coverage across unit and integration tests. The sync engine has dedicated tests for services, helpers, the client and the worker while the API has tests for controllers, services, and repositories.
 Verifiable by running `pnpm run test:cov`:
 
 
